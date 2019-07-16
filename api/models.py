@@ -2,10 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User as DjangoUser
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+from datetime import date
 
 userTypes = ( ('intern','intern'),('admin','admin') )
-locations = ( ('Delhi','Delhi'),('Tricity','Tricity') )
-cities = ( ('Delhi','Delhi'),('Tricity','Tricity') )
 
 class User(models.Model):
     name = models.CharField(max_length = 100, blank = False, null = False, unique = False)
@@ -16,22 +15,56 @@ class User(models.Model):
         if self.name:
             return str(self.name)
         else:
-            return self.AuthUser.username
+            return self.auth_user.username
     class Meta:
         ordering = ["name"]
 
+class City(models.Model):
+    city = models.CharField(max_length=100, blank = False, null = False)
+    def __str__(self):
+        return str(self.city)
+
+class Trade(models.Model):
+    trade = models.CharField(max_length=100, blank = False, null = False)
+    def __str__(self):
+        return str(self.trade)
+
+class Group(models.Model):
+    group = models.CharField(max_length=100, blank = False, null = False)
+    
+    def __str__(self):
+        return str(self.group)
+
+class Location(models.Model):
+    city =  models.ForeignKey(City, on_delete = models.CASCADE)
+    location = models.CharField(max_length=100, blank = False, null = False)
+    group = models.ForeignKey(Group, on_delete = models.CASCADE)
+    trade = models.ForeignKey(Trade, on_delete = models.CASCADE)
+    
+    def __str__(self):
+        return str(self.location)
+
+
 class FormSubmission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    location = models.CharField(max_length=100,choices=locations)
-    city = models.CharField(max_length=100, choices=cities)
-    mind_o = models.IntegerField()
-    body_o = models.IntegerField()
-    skin_o = models.IntegerField()
-    multipack_o = models.IntegerField()
-    mind_c = models.IntegerField()
-    body_c = models.IntegerField()
-    skin_c = models.IntegerField()
-    multipack_c = models.IntegerField()
-    jumbo_combos = models.IntegerField()
-    images = models.ImageField(blank=True,null=True)
-    created_on = models.DateField(editable = False, auto_now_add = True)
+    group = models.ForeignKey(Group, on_delete = models.CASCADE)
+    location = models.ForeignKey(Location, on_delete = models.CASCADE)
+    sales = models.CharField(max_length=100,default='0')
+    mind_o = models.CharField(max_length=100, blank = False, null = False)
+    body_o = models.CharField(max_length=100, blank = False, null = False)
+    skin_o = models.CharField(max_length=100, blank = False, null = False)
+    multipack_o = models.CharField(max_length=100, blank = False, null = False)
+    mind_c = models.CharField(max_length=100, blank = False, null = False)
+    body_c = models.CharField(max_length=100, blank = False, null = False)
+    skin_c = models.CharField(max_length=100, blank = False, null = False)
+    multipack_c = models.CharField(max_length=100, blank = False, null = False)
+    jumbo_combos = models.CharField(max_length=100, blank = False, null = False)
+    created_on = models.DateField(default = date.today, editable=False)
+
+    def save(self, *args, **kwargs):
+        self.sales = (int(self.mind_o) - int(self.mind_c)) + (int(self.body_o) - int(self.body_c)) + (int(self.skin_o) - int(self.skin_c)) + (int(self.multipack_o) - int(self.multipack_c)) + int(self.jumbo_combos)
+        super().save(*args, **kwargs)
+
+class ImageSubmisson(models.Model):
+    form_submission = models.ForeignKey(FormSubmission, on_delete = models.CASCADE)
+    image = models.ImageField(upload_to='submission_images/')

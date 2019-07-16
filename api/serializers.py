@@ -6,7 +6,11 @@ import datetime
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 
-
+class ImageSubmissonSeralizer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ImageSubmisson
+        fields = ('image',)
+        
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.SerializerMethodField()
     class Meta:
@@ -52,21 +56,49 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 class FormSubmissionSerializer(serializers.HyperlinkedModelSerializer):
+    images = serializers.SerializerMethodField()
     class Meta:
         model = FormSubmission
         fields = '__all__'
         read_only_fields = ('created_on',)
 
+    def get_images(self, obj):
+        images = ImageSubmisson.objects.filter(form_submission = obj)
+        return ImageSubmissonSeralizer(images, many=True, context={'request':self.context.get('request')}).data
 
     def create(self, validated_data):
         """
         Create and return a new `Snippet` instance, given the validated data.
         """
-        print(validated_data)
         return FormSubmission.objects.create(**validated_data)
 
     def to_internal_value(self, data):
         """
         do nothing in to_internal_value, i.e. do not trim off the invalid fields
         """
+        data['user'] = User.objects.get(id = self.context['request'].user.id)
         return data
+
+# City Serializer
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ('pk', 'city',)
+
+# Trade Serializer
+class TradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trade
+        fields = ('pk', 'trade',)
+
+# Group Serializer
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('pk', 'group')
+
+# Location Serializer
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ('pk', 'city', 'location', 'group')

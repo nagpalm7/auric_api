@@ -131,3 +131,5 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',  # <-- And here
     ],
 }
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # 'media' is my media folder
+MEDIA_URL = '/media/'
