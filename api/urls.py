@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/location/<int:pk>/', views.LocationDetail.as_view(), name='location-detail'),
     path('api/group/', views.GroupList.as_view(), name='group-list'),
     path('api/group/<int:pk>/', views.GroupDetail.as_view(), name='group-detail'),
+    path('api/reports/', views.Reports.as_view(), name='report'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

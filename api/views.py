@@ -304,3 +304,27 @@ class GroupDetail(APIView):
         group = self.get_object(pk)
         group.delete()
         return Response(status=HTTP_204_NO_CONTENT)
+
+##########################
+# Reports Views
+##########################
+
+class Reports(APIView):
+    def get(self, request, format = None):
+        reports = []
+        if request.GET.get('filter') == 'location':
+            forms = FormSubmission.objects.all()
+            for form in forms:
+                report = {
+                    "user": form.user
+                }
+        elif request.GET.get('filter') == 'group':
+            forms = FormSubmission.objects.filter(group = request.GET.get('group'))
+            for form in forms:
+                report = {
+                    "location" : [],
+                    "sales" : str(form.sales), 
+                }
+                reports.append(report)
+        print(Location.objects.get(location = form.location))
+        return Response(reports)
