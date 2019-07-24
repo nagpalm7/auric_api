@@ -126,6 +126,8 @@ class FormSubmissionDetail(APIView):
 
     def put(self, request, pk, format = None):
         form = self.get_object(pk)
+        request.data['group'] = Group.objects.get(pk = request.data.get('group'))
+        request.data['location'] = Location.objects.get(pk = request.data.get('location'))
         serializer = FormSubmissionSerializer(form, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -306,25 +308,45 @@ class GroupDetail(APIView):
         return Response(status=HTTP_204_NO_CONTENT)
 
 ##########################
-# Reports Views
+# Daily Report Views
 ##########################
 
 class Reports(APIView):
     def get(self, request, format = None):
         reports = []
         if request.GET.get('filter') == 'location':
-            forms = FormSubmission.objects.all()
-            for form in forms:
+            forms = FormSubmission.objects.filter(created_on = date.today())
+            locations = Location.objects.all()
+            for location in locations:
+                sales = 0
+                for form in forms:
+                    if location == form.location:
+                        sales = sales + form.sales
                 report = {
-                    "user": form.user
+                    "location" : location.location,
+                    "sales": sales
                 }
+                reports.append(report)      
         elif request.GET.get('filter') == 'group':
-            forms = FormSubmission.objects.filter(group = request.GET.get('group'))
-            for form in forms:
+            forms = FormSubmission.objects.filter(
+                group = request.GET.get('group'),
+                created_on = date.today())
+            users = User.objects.all()
+            for user in users:
+                sales = 0
+                count = 0
+                for form in forms:
+                    if user == form.user:
+                        sales = sales + form.sales
+                        count = count + 1
+                try:
+                    productivity = float(sales/count)
+                except ZeroDivisionError:
+                    productivity = 0
                 report = {
-                    "location" : [],
-                    "sales" : str(form.sales), 
+                    "user" : user.name,
+                    "sales": sales,
+                    "productivity": productivity,
                 }
-                reports.append(report)
-        print(Location.objects.get(location = form.location))
+                reports.append(report) 
         return Response(reports)
