@@ -2,3 +2,5 @@ env
 db.sqlite3
 *.pyc
 media
+myenv
+requirements.txt.save
