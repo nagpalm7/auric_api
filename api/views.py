@@ -6,7 +6,7 @@ from rest_framework import status
 from .models import *
 from .serializers import *
 from .permissions import *
-from datetime import date
+from datetime import date, timedelta
 
 ##########################
 # User Views
@@ -331,6 +331,94 @@ class Reports(APIView):
             forms = FormSubmission.objects.filter(
                 group = request.GET.get('group'),
                 created_on = date.today())
+            users = User.objects.all()
+            for user in users:
+                sales = 0
+                count = 0
+                for form in forms:
+                    if user == form.user:
+                        sales = sales + int(form.sales)
+                        count = count + 1
+                try:
+                    productivity = float(sales/count)
+                except ZeroDivisionError:
+                    productivity = 0
+                report = {
+                    "user" : user.name,
+                    "sales": sales,
+                    "productivity": productivity,
+                }
+                reports.append(report) 
+        return Response(reports)
+
+##########################
+# Weekly Report Views
+##########################
+
+class WeeklyReports(APIView):
+    def get(self, request, format = None):
+        reports = []
+        if request.GET.get('filter') == 'location':
+            forms = FormSubmission.objects.filter(created_on__range = [date.today() - timedelta(days=7), date.today()])
+            locations = Location.objects.all()
+            for location in locations:
+                sales = 0
+                for form in forms:
+                    if location == form.location:
+                        sales = sales + int(form.sales)
+                report = {
+                    "location" : location.location,
+                    "sales": sales
+                }
+                reports.append(report)      
+        elif request.GET.get('filter') == 'group':
+            forms = FormSubmission.objects.filter(
+                group = request.GET.get('group'),
+                created_on__range = [date.today() - timedelta(days=7), date.today()])
+            users = User.objects.all()
+            for user in users:
+                sales = 0
+                count = 0
+                for form in forms:
+                    if user == form.user:
+                        sales = sales + int(form.sales)
+                        count = count + 1
+                try:
+                    productivity = float(sales/count)
+                except ZeroDivisionError:
+                    productivity = 0
+                report = {
+                    "user" : user.name,
+                    "sales": sales,
+                    "productivity": productivity,
+                }
+                reports.append(report) 
+        return Response(reports)
+
+##########################
+# Monthly Report Views
+##########################
+
+class MonthlyReports(APIView):
+    def get(self, request, format = None):
+        reports = []
+        if request.GET.get('filter') == 'location':
+            forms = FormSubmission.objects.filter(created_on__range = [date.today() - timedelta(days=30), date.today()])
+            locations = Location.objects.all()
+            for location in locations:
+                sales = 0
+                for form in forms:
+                    if location == form.location:
+                        sales = sales + int(form.sales)
+                report = {
+                    "location" : location.location,
+                    "sales": sales
+                }
+                reports.append(report)      
+        elif request.GET.get('filter') == 'group':
+            forms = FormSubmission.objects.filter(
+                group = request.GET.get('group'),
+                created_on__range = [date.today() - timedelta(days=30), date.today()])
             users = User.objects.all()
             for user in users:
                 sales = 0

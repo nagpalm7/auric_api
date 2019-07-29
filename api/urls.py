@@ -15,6 +15,8 @@ urlpatterns = [
     path('api/group/', views.GroupList.as_view(), name='group-list'),
     path('api/group/<int:pk>/', views.GroupDetail.as_view(), name='group-detail'),
     path('api/reports/', views.Reports.as_view(), name='report'),
+    path('api/weekly-reports/', views.WeeklyReports.as_view(), name='weekly-report'),
+    path('api/monthly-reports/', views.MonthlyReports.as_view(), name='monthly-report'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
