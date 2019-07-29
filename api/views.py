@@ -321,7 +321,7 @@ class Reports(APIView):
                 sales = 0
                 for form in forms:
                     if location == form.location:
-                        sales = sales + form.sales
+                        sales = sales + int(form.sales)
                 report = {
                     "location" : location.location,
                     "sales": sales
@@ -337,7 +337,7 @@ class Reports(APIView):
                 count = 0
                 for form in forms:
                     if user == form.user:
-                        sales = sales + form.sales
+                        sales = sales + int(form.sales)
                         count = count + 1
                 try:
                     productivity = float(sales/count)
