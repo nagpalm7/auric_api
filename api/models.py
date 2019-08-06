@@ -62,7 +62,7 @@ class FormSubmission(models.Model):
     created_on = models.DateField(default = date.today, editable=False)
 
     def save(self, *args, **kwargs):
-        self.sales = (int(self.mind_o) - int(self.mind_c)) + (int(self.body_o) - int(self.body_c)) + (int(self.skin_o) - int(self.skin_c)) + (int(self.multipack_o) - int(self.multipack_c)) + int(self.jumbo_combos)
+        self.sales = (int(self.mind_o) - int(self.mind_c)) + (int(self.body_o) - int(self.body_c)) + (int(self.skin_o) - int(self.skin_c)) + ((int(self.multipack_o) - int(self.multipack_c)))*3
         super().save(*args, **kwargs)
 
 class ImageSubmisson(models.Model):
