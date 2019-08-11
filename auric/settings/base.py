@@ -18,7 +18,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEPLOYED = False
 
 if DEPLOYED:
-    DOMAIN = 'http://genesisclasses.tk/'   # Public IP
+    DOMAIN = 'http://13.235.78.30/'   # Public IP
 else:
     DOMAIN = 'http://localhost:8000/'
 
