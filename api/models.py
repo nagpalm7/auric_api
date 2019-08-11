@@ -40,10 +40,8 @@ class Location(models.Model):
     location = models.CharField(max_length=100, blank = False, null = False)
     group = models.ForeignKey(Group, on_delete = models.CASCADE)
     trade = models.ForeignKey(Trade, on_delete = models.CASCADE)
-    
     def __str__(self):
         return str(self.location)
-
 
 class FormSubmission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

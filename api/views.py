@@ -7,11 +7,14 @@ from .models import *
 from .serializers import *
 from .permissions import *
 from datetime import date, timedelta
+from auric.settings.base import DOMAIN, MEDIA_ROOT
+import os
 
 ##########################
 # Helper functions
 ##########################
-
+def getSpecific(list, id):
+    pass
 ##########################
 # User Views
 ##########################
@@ -407,7 +410,8 @@ class MonthlyReports(APIView):
     def get(self, request, format = None):
         reports = []
         if request.GET.get('filter') == 'location':
-            forms = FormSubmission.objects.filter(created_on__range = [date.today() - timedelta(days=30), date.today()])
+            forms = FormSubmission.objects.filter(created_on__range = [date.today().replace(day=1), date.today()])
+            print(date.today().replace(day=1))
             locations = Location.objects.all()
             for location in locations:
                 sales = 0
@@ -422,7 +426,7 @@ class MonthlyReports(APIView):
         elif request.GET.get('filter') == 'group':
             forms = FormSubmission.objects.filter(
                 group = request.GET.get('group'),
-                created_on__range = [date.today() - timedelta(days=30), date.today()])
+                created_on__range = [date.today().replace(day=1), date.today()])
             users = User.objects.all()
             for user in users:
                 sales = 0
@@ -447,42 +451,86 @@ class MonthlyReports(APIView):
 # Download Reports Link
 ##########################
 
-class MonthlyReports(APIView):
+class DownloadReports(APIView):
+
+    permission_classes = [IsAdminOrReadOnly,]
+
     def get(self, request, format = None):
         reports = []
-        if request.GET.get('filter') == 'location':
-            forms = FormSubmission.objects.filter(created_on__range = [date.today() - timedelta(days=30), date.today()])
-            locations = Location.objects.all()
-            for location in locations:
-                sales = 0
-                for form in forms:
-                    if location == form.location:
-                        sales = sales + int(form.sales)
-                report = {
-                    "location" : location.location,
-                    "sales": sales
-                }
-                reports.append(report)      
-        elif request.GET.get('filter') == 'group':
-            forms = FormSubmission.objects.filter(
-                group = request.GET.get('group'),
-                created_on__range = [date.today() - timedelta(days=30), date.today()])
-            users = User.objects.all()
-            for user in users:
-                sales = 0
-                count = 0
-                for form in forms:
-                    if user == form.user:
-                        sales = sales + int(form.sales)
-                        count = count + 1
-                try:
-                    productivity = float(sales/count)
-                except ZeroDivisionError:
-                    productivity = 0
-                report = {
-                    "user" : user.name,
-                    "sales": sales,
-                    "productivity": productivity,
-                }
-                reports.append(report) 
-        return Response(reports)
+        # Get List of forms for particular month     
+        forms = FormSubmission.objects.filter(
+            created_on__range = [date.today().replace(day=1), date.today()])
+        users = User.objects.all()
+        trades = Trade.objects.all()
+        city = City.objects.all()
+        group = Group.objects.all()
+
+        directory = MEDIA_ROOT + '/reports/'
+        if not os.path.exists(directory):
+            print('create dir')
+            os.makedirs(directory)
+        
+        path = directory + 'report.csv'
+        csvFile = open(path, 'w')
+        csvFile.write('Week, Date, Shop Name, Trade, City, Promoter Name, Mind, Body, Skin, Multipack, Total Sales, Jumbo Combo, Group\n')
+
+        for form in forms:
+            week = ''
+            if form.created_on:
+                week = 'Week ' + str(int(int(str(form.created_on).split('-')[2])/7 + 1))
+            created_on = ''
+            if form.created_on:
+                created_on = str(form.created_on)
+            location = ''
+            if form.location:
+                location = str(form.location.location)
+            trade = ''
+            if form.location:
+                trade = str(form.location.trade)
+            city = ''
+            if form.location:
+                city = str(form.location.city)
+            user = ''
+            if form.user:
+                user = str(form.user)
+            mind = ''
+            if form.mind_o and form.mind_c:
+                mind = str(int(form.mind_o) - int(form.mind_c))
+            skin = ''
+            if form.skin_o and form.skin_c:
+                skin = str(int(form.skin_o) - int(form.skin_c))
+            body = ''
+            if form.body_o and form.body_c:
+                body = str(int(form.body_o) - int(form.body_c))
+            multipack = ''
+            if form.multipack_o and form.multipack_c:
+                multipack = str((int(form.multipack_o) - int(form.multipack_c))*3)
+            sales = ''
+            if form.sales:
+                sales = str(form.sales)
+            jumbo_combos = ''
+            if form.jumbo_combos:
+                jumbo_combos = str(form.jumbo_combos)
+            group = ''
+            if form.group:
+                group = str(form.group)
+            csvFile.write(
+                str(week.replace(',', '|')) + ',' 
+                + str(created_on.replace(',', '|')) + ','
+                + str(location.replace(',', '|')) + ','
+                + str(trade.replace(',', '|')) + ','
+                + str(city.replace(',', '|')) + ','
+                + str(user.replace(',', '|')) + ','
+                + str(mind.replace(',', '|')) + ','
+                + str(body.replace(',', '|')) + ','
+                + str(skin.replace(',', '|')) + ','
+                + str(multipack.replace(',', '|')) + ','
+                + str(sales.replace(',', '|')) + ','
+                + str(jumbo_combos.replace(',', '|')) + ','
+                + str(group.replace(',', '|')) + ','
+                + '\n'
+            )
+        csvFile.close()
+        absolute_path = DOMAIN + 'media/reports/report.csv'
+        return Response({'status': 'successful', 'csvFile': absolute_path})
+        return Response()
