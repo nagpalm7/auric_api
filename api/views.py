@@ -9,6 +9,7 @@ from .permissions import *
 from datetime import date, timedelta
 from auric.settings.base import DOMAIN, MEDIA_ROOT
 import os
+import calendar
 
 ##########################
 # Helper functions
@@ -457,9 +458,11 @@ class DownloadReports(APIView):
 
     def get(self, request, format = None):
         reports = []
+        month = request.GET.get('month')
+        year = date.today().year
         # Get List of forms for particular month     
         forms = FormSubmission.objects.filter(
-            created_on__range = [date.today().replace(day=1), date.today()])
+            created_on__range = [date.today().replace(day=1, month=int(month)), date.today().replace(day=calendar.monthrange(int(year), int(month))[1], month=int(month))])
         users = User.objects.all()
         trades = Trade.objects.all()
         city = City.objects.all()
@@ -470,7 +473,7 @@ class DownloadReports(APIView):
             print('create dir')
             os.makedirs(directory)
         
-        path = directory + 'report.csv'
+        path = directory + 'monthly-report-' + month + '-' + str(year) + '.csv'
         csvFile = open(path, 'w')
         csvFile.write('Week, Date, Shop Name, Trade, City, Promoter Name, Mind, Body, Skin, Multipack, Total Sales, Jumbo Combo, Group\n')
 
@@ -531,5 +534,5 @@ class DownloadReports(APIView):
                 + '\n'
             )
         csvFile.close()
-        absolute_path = DOMAIN + 'media/reports/report.csv'
+        absolute_path = DOMAIN + 'media/reports/'+'monthly-report-' + month + '-' + str(year) + '.csv'
         return Response({'status': 'successful', 'csvFile': absolute_path})
