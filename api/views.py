@@ -465,7 +465,7 @@ class DownloadReports(APIView):
         city = City.objects.all()
         group = Group.objects.all()
 
-        directory = MEDIA_ROOT + '/reports/'
+        directory = MEDIA_ROOT + 'reports/'
         if not os.path.exists(directory):
             print('create dir')
             os.makedirs(directory)
