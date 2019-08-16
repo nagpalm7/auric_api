@@ -533,4 +533,3 @@ class DownloadReports(APIView):
         csvFile.close()
         absolute_path = DOMAIN + 'media/reports/report.csv'
         return Response({'status': 'successful', 'csvFile': absolute_path})
-        return Response()

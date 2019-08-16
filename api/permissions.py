@@ -7,13 +7,16 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     """
     def has_permission(self, request, view):
 
-        django_user = request.user
-        try:
-            mUser = User.objects.get(auth_user = django_user)
-        except User.DoesNotExist:
-            return False
+        if request.user.is_authenticated:
+            django_user = request.user
+            try:
+                mUser = User.objects.get(auth_user = django_user)
+            except User.DoesNotExist:
+                return False
 
-        if request.method == 'GET' and mUser.typeOfUser=='intern':
-            # for interns
-            return True
-        return mUser.typeOfUser == 'admin'
+            if request.method == 'GET' and mUser.typeOfUser=='intern':
+                # for interns
+                return True
+            return mUser.typeOfUser == 'admin'
+
+        return False
