@@ -56,12 +56,25 @@ class FormSubmission(models.Model):
     body_c = models.CharField(max_length=100, blank = False, null = False)
     skin_c = models.CharField(max_length=100, blank = False, null = False)
     multipack_c = models.CharField(max_length=100, blank = False, null = False)
+    num_samplings = models.CharField(max_length=100, blank = False, null = False)
     jumbo_combos = models.CharField(max_length=100, blank = False, null = False)
+    comment = models.CharField(max_length=100, blank = True, null = True)
     created_on = models.DateField(default = date.today, editable=False)
 
     def save(self, *args, **kwargs):
         self.sales = (int(self.mind_o) - int(self.mind_c)) + (int(self.body_o) - int(self.body_c)) + (int(self.skin_o) - int(self.skin_c)) + ((int(self.multipack_o) - int(self.multipack_c)))*3
         super().save(*args, **kwargs)
+
+class CustomerInformation(models.Model):
+    form_submission = models.ForeignKey(FormSubmission, on_delete = models.CASCADE)
+    name = models.CharField(max_length=100, blank = False, null = False)
+    email = models.CharField(max_length=100, blank = False, null = False)
+    address = models.CharField(max_length=100, blank = False, null = False)
+    number = models.CharField(max_length=100, blank = False, null = False)
+    mind = models.CharField(max_length=100, blank = False, null = False)
+    body = models.CharField(max_length=100, blank = False, null = False)
+    skin = models.CharField(max_length=100, blank = False, null = False)
+    multipack = models.CharField(max_length=100, blank = False, null = False)
 
 class ImageSubmisson(models.Model):
     form_submission = models.ForeignKey(FormSubmission, on_delete = models.CASCADE)
