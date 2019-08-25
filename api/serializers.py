@@ -79,6 +79,12 @@ class FormSubmissionSerializer(serializers.HyperlinkedModelSerializer):
         data['user'] = User.objects.get(id = self.context['request'].user.id)
         return data
 
+# CustomerInformation Serializer
+class CustomerInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerInformation
+        fields = '__all__'
+
 # City Serializer
 class CitySerializer(serializers.ModelSerializer):
     class Meta:

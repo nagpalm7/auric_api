@@ -148,6 +148,72 @@ class FormSubmissionDetail(APIView):
         return Response(status=HTTP_204_NO_CONTENT)
 
 ##########################
+# CustomerInformation Views
+
+##########################
+
+class CustomerInformationList(APIView):
+    def get(self, request, format = None):
+        form_id = request.GET.get('id')
+        try:
+            form = FormSubmission.objects.get(pk= form_id)
+        except FormSubmission.DoesNotExist:
+            raise Http404
+        customer = CustomerInformation.objects.filter(form_submission = form)
+        serializer = CustomerInformationSerializer(customer, many=True,  context={'request': request})
+        return Response(serializer.data)
+
+    def post(self, request, format = None):
+        required_fields = [
+            'form_submission',
+            'name', 
+            'number', 
+            'address', 
+            'email', 
+            'mind',
+            'body',
+            'skin', 
+            'multipack', 
+            ]
+
+        for field in required_fields:
+            if field not in request.data:
+                raise ValidationError('Not allowed, field missing')
+
+        request.data['form_submission'] = FormSubmission.objects.get(pk = request.data.get('form_submission'))  
+        serializer = CustomerInformationSerializer(data=request.data,  context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CustomerInformationDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return CustomerInformation.objects.get(pk=pk)
+        except CustomerInformation.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format = None):
+        customer = self.get_object(pk)
+        serializer = CustomerInformationSerializer(customer,  context={'request': request})
+        return Response(serializer.data)
+
+    def put(self, request, pk, format = None):
+        customer = self.get_object(pk)
+        request.data['form_submission'] = FormSubmission.objects.get(pk = request.data.get('form_submission'))
+        serializer = CustomerInformationSerializer(customer, data=request.data,  context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format = None):
+        customer = self.get_object(pk)
+        customer.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
+
+##########################
 # City Views
 ##########################
 
