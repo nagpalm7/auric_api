@@ -91,7 +91,8 @@ class FormSubmissionList(APIView):
             'skin_o', 
             'body_o',
             'multipack_o',
-            'mind_c', 
+            'mind_c',
+            'num_samplings',
             'skin_c', 
             'body_c',
             'multipack_c',
@@ -180,7 +181,6 @@ class CustomerInformationList(APIView):
             if field not in request.data:
                 raise ValidationError('Not allowed, field missing')
 
-        request.data['form_submission'] = FormSubmission.objects.get(pk = request.data.get('form_submission'))  
         serializer = CustomerInformationSerializer(data=request.data,  context={'request': request})
         if serializer.is_valid():
             serializer.save()
