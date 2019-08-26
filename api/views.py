@@ -602,3 +602,81 @@ class DownloadReports(APIView):
         csvFile.close()
         absolute_path = DOMAIN + 'media/reports/'+'monthly-report-' + month + '-' + str(year) + '.csv'
         return Response({'status': 'successful', 'csvFile': absolute_path})
+
+####################################
+# Download Customer Information Link
+####################################
+
+class DownloadCustomerInformation(APIView):
+
+    permission_classes = [IsAdminOrReadOnly,]
+
+    def get(self, request, format = None):
+        reports = []
+        month = request.GET.get('month')
+        year = date.today().year
+        # Get List of forms for particular month     
+        forms = FormSubmission.objects.filter(
+            created_on__range = [date.today().replace(day=1, month=int(month)), date.today().replace(day=calendar.monthrange(int(year), int(month))[1], month=int(month))])
+        customers = CustomerInformation.objects.filter(form_submission__in=forms)
+        directory = MEDIA_ROOT + 'customers/'
+        if not os.path.exists(directory):
+            print('create dir')
+            os.makedirs(directory)
+        
+        path = directory + 'monthly-customer-details' + month + '-' + str(year) + '.csv'
+        csvFile = open(path, 'w')
+        csvFile.write('Group Name, Location, Promoter Name, Customer Name, Customer Email, Customer Address, Customer Number, Mind, Body, Skin, Multipack\n')
+
+        for customer in customers:
+            group = ''
+            if customer.form_submission.group:
+                group = str(customer.form_submission.group)
+            location = ''
+            if customer.form_submission.location:
+                location = str(customer.form_submission.location.location)
+            user = ''
+            if customer.form_submission.user.name:
+                user = str(customer.form_submission.user.name)
+            name = ''
+            if customer.name:
+                name = str(customer.name)
+            email = ''
+            if customer.email:
+                email = str(customer.email)
+            address = ''
+            if customer.address:
+                address = str(customer.address)
+            number = ''
+            if customer.number:
+                number = str(customer.number)
+            mind = ''
+            if customer.mind:
+                mind = str(customer.mind)
+            body = ''
+            if customer.body:
+                body = str(customer.body)
+            skin = ''
+            if customer.skin:
+                skin = str(customer.skin)
+            multipack = ''
+            if customer.multipack:
+                multipack = str(customer.multipack)
+            
+            csvFile.write(
+                str(group.replace(',', '|')) + ',' 
+                + str(location.replace(',', '|')) + ','
+                + str(user.replace(',', '|')) + ','
+                + str(name.replace(',', '|')) + ','
+                + str(email.replace(',', '|')) + ','
+                + str(address.replace(',', '|')) + ','
+                + str(number.replace(',', '|')) + ','
+                + str(mind.replace(',', '|')) + ','
+                + str(body.replace(',', '|')) + ','
+                + str(skin.replace(',', '|')) + ','
+                + str(multipack.replace(',', '|')) + ','
+                + '\n'
+            )
+        csvFile.close()
+        absolute_path = DOMAIN + 'media/customers/'+'monthly-customer-details' + month + '-' + str(year) + '.csv'
+        return Response({'status': 'successful', 'csvFile': absolute_path})

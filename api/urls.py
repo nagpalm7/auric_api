@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/weekly-reports/', views.WeeklyReports.as_view(), name='weekly-report'),
     path('api/monthly-reports/', views.MonthlyReports.as_view(), name='monthly-report'),
     path('api/download-reports/', views.DownloadReports.as_view(), name='download-reports'),
+    path('api/download-customer-information/', views.DownloadCustomerInformation.as_view(), name='download-customer-information'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
