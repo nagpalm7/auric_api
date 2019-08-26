@@ -541,7 +541,7 @@ class DownloadReports(APIView):
         
         path = directory + 'monthly-report-' + month + '-' + str(year) + '.csv'
         csvFile = open(path, 'w')
-        csvFile.write('Week, Date, Shop Name, Trade, City, Promoter Name, Mind, Body, Skin, Multipack, Total Sales, Jumbo Combo, Group\n')
+        csvFile.write('Week, Date, Shop Name, Trade, City, Promoter Name, Mind, Body, Skin, Multipack, Total Sales, Jumbo Combo, Group, Number Of Samplings, Comment\n')
 
         for form in forms:
             week = ''
@@ -583,6 +583,12 @@ class DownloadReports(APIView):
             group = ''
             if form.group:
                 group = str(form.group)
+            comment = ''
+            if form.comment:
+                comment = str(form.comment)
+            num_samplings = ''
+            if form.num_samplings:
+                num_samplings = str(form.num_samplings)
             csvFile.write(
                 str(week.replace(',', '|')) + ',' 
                 + str(created_on.replace(',', '|')) + ','
@@ -597,6 +603,8 @@ class DownloadReports(APIView):
                 + str(sales.replace(',', '|')) + ','
                 + str(jumbo_combos.replace(',', '|')) + ','
                 + str(group.replace(',', '|')) + ','
+                + str(num_samplings.replace(',', '|')) + ','
+                + str(comment.replace(',', '|')) + ','
                 + '\n'
             )
         csvFile.close()
