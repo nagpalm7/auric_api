@@ -104,11 +104,15 @@ class FormSubmissionList(APIView):
 
         # check if form is already submitted today from same location
         current_user = User.objects.get(auth_user = request.user)
-        existing_submission = FormSubmission.objects.filter(
-            user=current_user,
-            location=request.data.get('location'),
-            created_on=date.today(),
-        )
+        try:
+            existing_submission = FormSubmission.objects.filter(
+                user=current_user,
+                location=request.data.get('location'),
+                created_on=date.today(),
+            )
+        except existing_submission.DoesNotExist:
+            existing_submission = []
+            
         if existing_submission.count() > 0:
             raise ValidationError('Not allowed')
 
