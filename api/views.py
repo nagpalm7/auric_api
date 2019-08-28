@@ -84,6 +84,7 @@ class FormSubmissionList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format = None):
+        request.session.flush()
         required_fields = [
             'group', 
             'location', 
