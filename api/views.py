@@ -110,9 +110,9 @@ class FormSubmissionList(APIView):
                 location=request.data.get('location'),
                 created_on=date.today(),
             )
-        except existing_submission.DoesNotExist:
+        except FormSubmission.DoesNotExist:
             existing_submission = []
-            
+
         if existing_submission.count() > 0:
             raise ValidationError('Not allowed')
 
