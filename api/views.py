@@ -84,7 +84,6 @@ class FormSubmissionList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format = None):
-        request.session.flush()
         required_fields = [
             'group', 
             'location', 
@@ -107,7 +106,8 @@ class FormSubmissionList(APIView):
         try:
             current_user = User.objects.get(auth_user = request.user)
         except User.DoesNotExist:
-            raise Http404
+            return Response(request.user)
+
         try:
             existing_submission = FormSubmission.objects.filter(
                 user=current_user,
