@@ -103,7 +103,10 @@ class FormSubmissionList(APIView):
                 raise ValidationError('Not allowed, field missing')
 
         # check if form is already submitted today from same location
-        current_user = User.objects.get(auth_user = request.user)
+        try:
+            current_user = User.objects.get(auth_user = request.user)
+        except User.DoesNotExist:
+            raise Http404
         try:
             existing_submission = FormSubmission.objects.filter(
                 user=current_user,
