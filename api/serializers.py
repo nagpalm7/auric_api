@@ -76,7 +76,7 @@ class FormSubmissionSerializer(serializers.HyperlinkedModelSerializer):
         """
         do nothing in to_internal_value, i.e. do not trim off the invalid fields
         """
-        data['user'] = User.objects.get(id = self.context['request'].user.id)
+        data['user'] = User.objects.get(auth_user__id = self.context['request'].user.id)
         return data
 
 # CustomerInformation Serializer
