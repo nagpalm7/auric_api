@@ -422,7 +422,7 @@ class Reports(APIView):
                         sales = sales + int(form.sales)
                         count = count + 1
                 try:
-                    productivity = float(sales/count)
+                    productivity = float(sales)
                 except ZeroDivisionError:
                     productivity = 0
                 report = {
@@ -466,7 +466,7 @@ class WeeklyReports(APIView):
                         sales = sales + int(form.sales)
                         count = count + 1
                 try:
-                    productivity = float(sales/count)
+                    productivity = float(sales/7)
                 except ZeroDivisionError:
                     productivity = 0
                 report = {
@@ -511,7 +511,7 @@ class MonthlyReports(APIView):
                         sales = sales + int(form.sales)
                         count = count + 1
                 try:
-                    productivity = float(sales/count)
+                    productivity = float(sales/int(date.today().day))
                 except ZeroDivisionError:
                     productivity = 0
                 report = {
