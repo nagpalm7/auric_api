@@ -5,3 +5,4 @@ media
 myenv
 requirements.txt.save
 auric/static
+debug.log
